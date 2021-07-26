@@ -25,4 +25,38 @@ const createUser = (req, res) => {
     });
 };
 
-module.exports = { getUsers, getProfile, createUser };
+const updateUser = (req, res) => {
+  const { name, about } = req.body;
+  const userId = req.user._id;
+
+  User.findByIdAndUpdate(userId, { name, about }, { new: true })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Нет пользователя с таким id' });
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+};
+
+const updateAvatar = (req, res) => {
+  const { avatar } = req.body;
+  const userId = req.user._id;
+
+  User.findByIdAndUpdate(userId, { avatar }, { new: true })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Нет пользователя с таким id' });
+      }
+      return res.status(200).send(user);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
+};
+
+module.exports = {
+  getUsers, getProfile, createUser, updateUser, updateAvatar,
+};
