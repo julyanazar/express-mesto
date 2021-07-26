@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const usersRouter = require('./routes/users');
+const cardsRouter = require('./routes/cards');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -26,6 +27,7 @@ app.use((req, res, next) => {
 });
 
 app.use('/', usersRouter);
+app.use('/', cardsRouter);
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
