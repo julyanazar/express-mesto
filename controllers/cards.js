@@ -22,11 +22,9 @@ const createCard = (req, res) => {
 
 const deleteCard = (req, res) => {
   Card.findOneAndRemove({ owner: req.user._id, _id: req.params.cardId })
-    .then((card) => {
-      if (!card) {
-        return res.status(ERR_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена' });
-      }
-      return res.status(200).send({ message: 'Карточка удалена' });
+    .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Карточка с таким id не найдена' }))
+    .then(() => {
+      res.status(200).send({ message: 'Карточка удалена' });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -43,11 +41,9 @@ const likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
+    .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Карточка с таким id не найдена' }))
     .then((card) => {
-      if (!card) {
-        return res.status(ERR_NOT_FOUND).send({ message: 'Карточка с указанным _id не найдена.' });
-      }
-      return res.status(200).send(card);
+      res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -64,11 +60,9 @@ const dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
+    .orFail(() => res.status(ERR_NOT_FOUND).send({ message: 'Карточка с таким id не найдена' }))
     .then((card) => {
-      if (!card) {
-        return res.status(ERR_NOT_FOUND).send({ message: 'Нет карточки с таким id' });
-      }
-      return res.status(200).send(card);
+      res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'CastError') {
