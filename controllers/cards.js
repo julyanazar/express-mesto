@@ -1,23 +1,20 @@
 const Card = require('../models/card');
-const { ERR_DEFAULT } = require('../errors/errors');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 
-const getCards = (req, res) => Card.find({})
+const getCards = (req, res, next) => Card.find({})
   .then((cards) => res.status(200).send(cards))
-  .catch((err) => res.status(ERR_DEFAULT).send(err));
+  .catch(next);
 
 const createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
   Card.create({ name, link, owner })
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.send({ data: card }))
     .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные при создании карточки');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
+      if (err.name === 'ValidationError') {
+        throw new BadRequest(err.message);
       }
     })
     .catch(next);
@@ -32,13 +29,6 @@ const deleteCard = (req, res, next) => {
     .then(() => {
       res.status(200).send({ message: 'Карточка удалена' });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные при удалении карточки');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    })
     .catch(next);
 };
 
@@ -48,18 +38,10 @@ const likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail()
-    .catch(() => {
+    .orFail(() => {
       throw new NotFound('Карточка с таким id не найдена');
     })
     .then((likes) => res.send({ data: likes }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные для постановки лайка');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    })
     .catch(next);
 };
 
@@ -69,18 +51,10 @@ const dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail()
-    .catch(() => {
+    .orFail(() => {
       throw new NotFound('Карточка с таким id не найдена');
     })
     .then((likes) => res.send({ data: likes }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        throw new BadRequest('Переданы некорректные данные для снятия лайка');
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    })
     .catch(next);
 };
 

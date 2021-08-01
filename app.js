@@ -23,6 +23,7 @@ mongoose.connect('mongodb://localhost:27017/mestodbnew', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
+  useUnifiedTopology: true,
 });
 
 app.use(express.json());
@@ -45,6 +46,17 @@ app.use('/', auth, usersRouter);
 app.use('/', auth, cardsRouter);
 app.use('*', () => {
   throw new NotFound('Запрашиваемый ресурс не найден');
+});
+
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res.status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
 });
 
 app.use(errors());
