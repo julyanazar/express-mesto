@@ -35,11 +35,12 @@ const userSchema = new Schema({
     type: String,
     required: true,
     unique: true,
+    select: false,
   },
 });
 
 userSchema.statics.findUserByCredentials = function (email, password) {
-  return this.findOne({ email })
+  return this.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
         throw new Auth('Неправильные почта или пароль');

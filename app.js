@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
@@ -24,14 +25,16 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
 
 app.use(express.json());
 
-// Мидлвар: временное решение для авторизаци
-app.use((req, res, next) => {
-  req.user = {
-    _id: '6106db480d96512b6435100b',
-  };
+app.use(cookieParser());
 
-  next();
-});
+// // Мидлвар: временное решение для авторизаци
+// app.use((req, res, next) => {
+//   req.user = {
+//     _id: '6106db480d96512b6435100b',
+//   };
+
+//   next();
+// });
 
 app.post('/signin', login);
 app.post('/signup', createUser);

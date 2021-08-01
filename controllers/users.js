@@ -95,11 +95,17 @@ const login = (req, res) => {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       })
-        .send({ message: 'Вы авторизовались!' });
+        .send({ token });
     })
     .catch(() => res.status(ERR_AUTH).send({ message: 'Ошибка авторизации' }));
 };
 
+const getCurrentUser = (req, res) => {
+  User.findById(req.user._id)
+    .then((currentUser) => res.send({ currentUser }))
+    .catch((err) => res.send(err));
+};
+
 module.exports = {
-  getUsers, getProfile, createUser, updateUser, updateAvatar, login,
+  getUsers, getProfile, createUser, updateUser, updateAvatar, login, getCurrentUser,
 };
