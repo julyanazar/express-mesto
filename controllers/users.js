@@ -95,7 +95,7 @@ const login = (req, res) => {
         maxAge: 3600000 * 24 * 7,
         httpOnly: true,
       })
-        .send({ message: 'sdfasdfasfsafsa' });
+        .send({ message: 'Вы авторизовались!' });
     })
     .catch(() => res.status(ERR_AUTH).send({ message: 'Ошибка авторизации' }));
 };

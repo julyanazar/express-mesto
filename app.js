@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const { ERR_NOT_FOUND } = require('./errors/errors');
+const { login, createUser } = require('./controllers/users');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -30,6 +31,9 @@ app.use((req, res, next) => {
 
   next();
 });
+
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.use('/', usersRouter);
 app.use('/', cardsRouter);
