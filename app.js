@@ -2,12 +2,14 @@ const express = require('express');
 const mongoose = require('mongoose');
 const helmet = require('helmet');
 const cookieParser = require('cookie-parser');
+const { errors } = require('celebrate');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
 const NotFound = require('./errors/NotFound');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
+const { validationSignIn, validationSignUp } = require('./middlewares/validate');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -17,7 +19,7 @@ const app = express();
 app.use(helmet());
 
 // Подлключаемся к БД mestodb
-mongoose.connect('mongodb://localhost:27017/mestodb', {
+mongoose.connect('mongodb://localhost:27017/mestodbnew', {
   useNewUrlParser: true,
   useCreateIndex: true,
   useFindAndModify: false,
@@ -36,14 +38,16 @@ app.use(cookieParser());
 //   next();
 // });
 
-app.post('/signin', login);
-app.post('/signup', createUser);
+app.post('/signin', validationSignIn, login);
+app.post('/signup', validationSignUp, createUser);
 
 app.use('/', auth, usersRouter);
 app.use('/', auth, cardsRouter);
 app.use('*', () => {
   throw new NotFound('Запрашиваемый ресурс не найден');
 });
+
+app.use(errors());
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
