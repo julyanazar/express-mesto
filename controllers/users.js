@@ -1,7 +1,10 @@
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const User = require('../models/user');
-const { ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND } = require('../errors/errors');
+const {
+  ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND, ERR_AUTH,
+} = require('../errors/errors');
 
 const getUsers = (req, res) => User.find({})
   .then((users) => res.status(200).send(users))
@@ -77,6 +80,26 @@ const updateAvatar = (req, res) => {
     });
 };
 
+const login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        'secret-key',
+        { expiresIn: '7d' },
+      );
+
+      res.cookie('jwt', token, {
+        maxAge: 3600000 * 24 * 7,
+        httpOnly: true,
+      })
+        .send({ message: 'sdfasdfasfsafsa' });
+    })
+    .catch(() => res.status(ERR_AUTH).send({ message: 'Ошибка авторизации' }));
+};
+
 module.exports = {
-  getUsers, getProfile, createUser, updateUser, updateAvatar,
+  getUsers, getProfile, createUser, updateUser, updateAvatar, login,
 };
