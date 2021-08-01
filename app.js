@@ -25,7 +25,7 @@ app.use(express.json());
 // Мидлвар: временное решение для авторизаци
 app.use((req, res, next) => {
   req.user = {
-    _id: '60febe584150fa3508e8f33d',
+    _id: '6106db480d96512b6435100b',
   };
 
   next();

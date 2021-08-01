@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 const User = require('../models/user');
 const { ERR_BAD_REQUEST, ERR_DEFAULT, ERR_NOT_FOUND } = require('../errors/errors');
 
@@ -19,17 +21,24 @@ const getProfile = (req, res) => User.findById(req.params.id)
   });
 
 const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.status(200).send({ data: user }))
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
-      } else {
-        res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
-      }
-    });
+  bcrypt.hash(password, 10)
+    .then((hash) => User.create({
+      name, about, avatar, email, password: hash,
+    })
+      .then((user) => res.send({ data: user }))
+      .catch((err) => {
+        if (err.name === 'ValidationError') {
+          res.status(ERR_BAD_REQUEST).send({ message: 'Ошибка валидации' });
+        } else if (err.name === 'CastError') {
+          res.status(ERR_BAD_REQUEST).send({ message: 'Переданы некорректные данные при создании пользователя' });
+        } else {
+          res.status(ERR_DEFAULT).send({ message: 'Произошла ошибка' });
+        }
+      }));
 };
 
 const updateUser = (req, res) => {
