@@ -30,20 +30,13 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-// // Мидлвар: временное решение для авторизаци
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '6106db480d96512b6435100b',
-//   };
-
-//   next();
-// });
-
 app.post('/signin', validationSignIn, login);
 app.post('/signup', validationSignUp, createUser);
 
 app.use('/', auth, usersRouter);
 app.use('/', auth, cardsRouter);
+
+app.use(errors());
 app.use('*', () => {
   throw new NotFound('Запрашиваемый ресурс не найден');
 });
@@ -58,8 +51,6 @@ app.use((err, req, res, next) => {
     });
   next();
 });
-
-app.use(errors());
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
