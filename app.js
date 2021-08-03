@@ -6,10 +6,12 @@ const { errors } = require('celebrate');
 
 const usersRouter = require('./routes/users');
 const cardsRouter = require('./routes/cards');
-const NotFound = require('./errors/NotFound');
 const { login, createUser } = require('./controllers/users');
+
 const auth = require('./middlewares/auth');
 const { validationSignIn, validationSignUp } = require('./middlewares/validate');
+const { handleError } = require('./middlewares/handleError');
+const { notFoundPage } = require('./middlewares/notFoundPage');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -37,20 +39,8 @@ app.use('/', auth, usersRouter);
 app.use('/', auth, cardsRouter);
 
 app.use(errors());
-app.use('*', () => {
-  throw new NotFound('Запрашиваемый ресурс не найден');
-});
-
-app.use((err, req, res, next) => {
-  const { statusCode = 500, message } = err;
-  res.status(statusCode)
-    .send({
-      message: statusCode === 500
-        ? 'На сервере произошла ошибка'
-        : message,
-    });
-  next();
-});
+app.get('*', notFoundPage);
+app.use(handleError);
 
 app.listen(PORT, () => {
   // Если всё работает, консоль покажет, какой порт приложение слушает
