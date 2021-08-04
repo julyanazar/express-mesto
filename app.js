@@ -12,6 +12,7 @@ const auth = require('./middlewares/auth');
 const { validationSignIn, validationSignUp } = require('./middlewares/validate');
 const { handleError } = require('./middlewares/handleError');
 const { notFoundPage } = require('./middlewares/notFoundPage');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 // Слушаем 3000 порт
 const { PORT = 3000 } = process.env;
@@ -32,14 +33,18 @@ app.use(express.json());
 
 app.use(cookieParser());
 
+app.use(requestLogger); // подключаем логгер запросов
+
 app.post('/signin', validationSignIn, login);
 app.post('/signup', validationSignUp, createUser);
 
 app.use('/', auth, usersRouter);
 app.use('/', auth, cardsRouter);
+app.get('*', notFoundPage);
+
+app.use(errorLogger); // подключаем логгер ошибок
 
 app.use(errors());
-app.get('*', notFoundPage);
 app.use(handleError);
 
 app.listen(PORT, () => {
